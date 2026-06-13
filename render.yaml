@@ -6,7 +6,7 @@ services:
     # Installs pnpm globally, installs all dependencies, and builds the monorepo
     buildCommand: pnpm install && pnpm run build
     # Navigates into the backend folder and starts the compiled server
-    startCommand: cd api-server && pnpm run start
+    startCommand: cd api-server && node --enable-source-maps ./dist/index.mjs
     envVars:
       - key: NODE_ENV
         value: production
