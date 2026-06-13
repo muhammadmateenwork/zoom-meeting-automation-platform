@@ -1,0 +1,472 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Zoom Meeting Automation Platform API
+servers:
+  - url: /api
+tags:
+  - name: health
+  - name: auth
+  - name: meetings
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+          description: Healthy
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterInput" }
+      responses:
+        "201":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+          description: Registered
+        "400":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+          description: Bad request
+        "409":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+          description: Email already in use
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginInput" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+          description: Logged in
+        "401":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+          description: Invalid credentials
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+          description: Current user
+        "401":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+          description: Unauthorized
+
+  /auth/profile:
+    put:
+      operationId: updateProfile
+      tags: [auth]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateProfileInput" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+          description: Updated profile
+        "400":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+          description: Bad request
+
+  /meetings:
+    get:
+      operationId: listMeetings
+      tags: [meetings]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Meeting" }
+          description: List of meetings
+    post:
+      operationId: createMeeting
+      tags: [meetings]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MeetingInput" }
+      responses:
+        "201":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Meeting" }
+          description: Meeting created
+        "400":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+          description: Bad request
+
+  /meetings/stats:
+    get:
+      operationId: getMeetingStats
+      tags: [meetings]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MeetingStats" }
+          description: Stats
+
+  /meetings/{id}:
+    get:
+      operationId: getMeeting
+      tags: [meetings]
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Meeting" }
+          description: Meeting
+        "404":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+          description: Not found
+    put:
+      operationId: updateMeeting
+      tags: [meetings]
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MeetingUpdate" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Meeting" }
+          description: Updated
+        "404":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+          description: Not found
+    delete:
+      operationId: deleteMeeting
+      tags: [meetings]
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+          description: Not found
+
+  /meetings/{id}/resend:
+    post:
+      operationId: resendInvitation
+      tags: [meetings]
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SuccessResponse" }
+          description: Resent
+
+  /meetings/{id}/cancel:
+    post:
+      operationId: cancelMeeting
+      tags: [meetings]
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CancelMeetingInput" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Meeting" }
+          description: Cancelled
+        "404":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+          description: Not found
+
+  /meetings/{id}/reschedule:
+    post:
+      operationId: rescheduleMeeting
+      tags: [meetings]
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RescheduleMeetingInput" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Meeting" }
+          description: Rescheduled
+        "404":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+          description: Not found
+
+  /meetings/{id}/status:
+    put:
+      operationId: updateMeetingStatus
+      tags: [meetings]
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateStatusInput" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Meeting" }
+          description: Status updated
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status: { type: string }
+      required: [status]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error: { type: string }
+      required: [error]
+
+    SuccessResponse:
+      type: object
+      properties:
+        message: { type: string }
+      required: [message]
+
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        email: { type: string }
+        name: { type: string }
+        companyName: { type: ["string", "null"] }
+        jobTitle: { type: ["string", "null"] }
+        phone: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+      required: [id, email, name, createdAt]
+
+    AuthResponse:
+      type: object
+      properties:
+        token: { type: string }
+        user: { $ref: "#/components/schemas/User" }
+      required: [token, user]
+
+    RegisterInput:
+      type: object
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 6 }
+        name: { type: string }
+      required: [email, password, name]
+
+    LoginInput:
+      type: object
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+      required: [email, password]
+
+    UpdateProfileInput:
+      type: object
+      properties:
+        name: { type: string }
+        companyName: { type: string }
+        jobTitle: { type: string }
+        phone: { type: string }
+
+    Meeting:
+      type: object
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        meetingType: { type: string, enum: [client, internal, personal] }
+        clientName: { type: string }
+        clientEmail: { type: string }
+        cc: { type: array, items: { type: string } }
+        bcc: { type: array, items: { type: string } }
+        meetingTitle: { type: string }
+        description: { type: ["string", "null"] }
+        meetingDate: { type: string }
+        meetingTime: { type: string }
+        duration: { type: integer }
+        timezone: { type: string }
+        organizerName: { type: ["string", "null"] }
+        organizerEmail: { type: ["string", "null"] }
+        organizerCompany: { type: ["string", "null"] }
+        organizerTitle: { type: ["string", "null"] }
+        zoomMeetingId: { type: ["string", "null"] }
+        zoomJoinUrl: { type: ["string", "null"] }
+        zoomStartUrl: { type: ["string", "null"] }
+        status: { type: string, enum: [scheduled, completed, cancelled] }
+        cancelReason: { type: ["string", "null"] }
+        cancelledAt: { type: ["string", "null"] }
+        rescheduledFrom: { type: ["string", "null"] }
+        notes: { type: ["string", "null"] }
+        emailSentAt: { type: ["string", "null"] }
+        reminder24SentAt: { type: ["string", "null"] }
+        reminder1SentAt: { type: ["string", "null"] }
+        cancellationEmailSentAt: { type: ["string", "null"] }
+        rescheduleEmailSentAt: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+      required: [id, userId, meetingType, clientName, clientEmail, cc, bcc, meetingTitle, meetingDate, meetingTime, duration, timezone, status, createdAt]
+
+    MeetingInput:
+      type: object
+      properties:
+        meetingType: { type: string, enum: [client, internal, personal] }
+        clientName: { type: string }
+        clientEmail: { type: string, format: email }
+        cc: { type: array, items: { type: string, format: email } }
+        bcc: { type: array, items: { type: string, format: email } }
+        meetingTitle: { type: string }
+        description: { type: string }
+        meetingDate: { type: string }
+        meetingTime: { type: string }
+        duration: { type: integer }
+        timezone: { type: string }
+        notes: { type: string }
+      required: [clientName, clientEmail, meetingTitle, meetingDate, meetingTime]
+
+    MeetingUpdate:
+      type: object
+      properties:
+        meetingType: { type: string, enum: [client, internal, personal] }
+        clientName: { type: string }
+        clientEmail: { type: string, format: email }
+        cc: { type: array, items: { type: string, format: email } }
+        bcc: { type: array, items: { type: string, format: email } }
+        meetingTitle: { type: string }
+        description: { type: string }
+        meetingDate: { type: string }
+        meetingTime: { type: string }
+        duration: { type: integer }
+        timezone: { type: string }
+        notes: { type: string }
+        status: { type: string, enum: [scheduled, completed, cancelled] }
+
+    CancelMeetingInput:
+      type: object
+      properties:
+        reason: { type: string }
+      required: [reason]
+
+    RescheduleMeetingInput:
+      type: object
+      properties:
+        meetingDate: { type: string }
+        meetingTime: { type: string }
+        reason: { type: string }
+      required: [meetingDate, meetingTime]
+
+    UpdateStatusInput:
+      type: object
+      properties:
+        status: { type: string, enum: [scheduled, completed, cancelled] }
+      required: [status]
+
+    MeetingStats:
+      type: object
+      properties:
+        total: { type: integer }
+        upcoming: { type: integer }
+        completed: { type: integer }
+        cancelled: { type: integer }
+        thisWeek: { type: integer }
+        thisMonth: { type: integer }
+      required: [total, upcoming, completed, cancelled, thisWeek, thisMonth]

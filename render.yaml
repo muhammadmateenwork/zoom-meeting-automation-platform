@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: saas-api-server
+    env: node
+    plan: free
+    # Installs pnpm globally, installs all dependencies, and builds the monorepo
+    buildCommand: npm install -g pnpm && pnpm install && pnpm run build
+    # Navigates into the backend folder and starts the compiled server
+    startCommand: cd api-server && pnpm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      # Add your backend environment variables below (like MongoDB URI)
+      # - key: MONGODB_URI
+      #   value: your_production_database_url_here
