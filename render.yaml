@@ -12,6 +12,17 @@ services:
         value: production
       - key: PORT
         value: 10000
-      # Add your backend environment variables below (like MongoDB URI)
-      # - key: MONGODB_URI
-      #   value: your_production_database_url_here
+      - key: SESSION_SECRET
+        value: uJenWUlBzs+J+vzDDEEh0K5+b410C9Qx3bj4DNk/RQrG5snXkluqT648A6YQ4RHQiKrN3MU7z41TnaAgL+Z9Gg==
+      - key: RESEND_API_KEY
+        value: re_WP5EDRQp_3GJhcrsG44gmwSphFW2PJhMv
+      - key: ZOOM_ACCOUNT_ID
+        value: jBcOSGC8S4KEBPBUeNNTJw
+      - key: ZOOM_CLIENT_ID
+        value: UjRaPWabR6SaNFuyNgZEng
+      - key: ZOOM_CLIENT_SECRET
+        value: x39dhmSC5U2rf8ZGefOUTECDG6q1yn86
+      - key: MONGO_URI
+        value: mongodb+srv://muhammadmateen543_db_user:83ACH4vG@cluster0.pitbcyn.mongodb.net/?appName=Cluster0
+      - key: PORT
+        value: 5000
