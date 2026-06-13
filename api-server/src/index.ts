@@ -22,8 +22,8 @@ async function main() {
   const frontendPath = path.join(__dirname, "../../zoom-platform/dist/public");
   app.use(express.static(frontendPath));
 
-  // 2. Catch-all routing: send any unknown requests to React Router
-  app.get("*", (req, res) => {
+  // 2. Catch-all routing: Express 5 compliant wildcard regex
+  app.get(/(.*)/, (req, res) => {
     res.sendFile(path.join(frontendPath, "index.html"));
   });
 
